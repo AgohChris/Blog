@@ -2,6 +2,7 @@ package com.blog.jwtauthblog.service;
 
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${app.jwt.secret")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
     @Value("${app.jwt.expiration}")
@@ -94,4 +95,8 @@ public class JwtService {
             throw new RuntimeException("Token vide", e);
         }
     }
-}
+    @PostConstruct
+    public void logSecret() {
+        System.out.println("[DEBUG] Clé JWT utilisée : " + jwtSecret + " (longueur: " + jwtSecret.length() + ")");
+    }
+ }
