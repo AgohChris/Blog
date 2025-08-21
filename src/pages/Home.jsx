@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -27,6 +27,7 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { isAuthenticated } = useAuth();
   const articlesPerPage = 6;
+  const articlesSectionRef = useRef(null);
 
   useEffect(() => {
     fetchArticles();
@@ -34,60 +35,62 @@ const Home = () => {
 
   const fetchArticles = async () => {
     try {
-      // Simuler des données pour la démo
-      const mockArticles = [
-        {
-          id: 1,
-          title: "Introduction à React et ses hooks",
-          content: "React est une bibliothèque JavaScript populaire pour créer des interfaces utilisateur. Les hooks ont révolutionné la façon dont nous écrivons des composants React...",
-          author: { username: "Alice Dupont" },
-          createdAt: "2024-01-15T10:30:00Z",
-          views: 245
-        },
-        {
-          id: 2,
-          title: "Guide complet de TailwindCSS",
-          content: "TailwindCSS est un framework CSS utility-first qui permet de créer rapidement des designs personnalisés. Dans ce guide, nous explorerons ses fonctionnalités...",
-          author: { username: "Bob Martin" },
-          createdAt: "2024-01-14T14:20:00Z",
-          views: 189
-        },
-        {
-          id: 3,
-          title: "Les meilleures pratiques en JavaScript moderne",
-          content: "JavaScript évolue constamment avec de nouvelles fonctionnalités ES6+. Découvrons ensemble les meilleures pratiques pour écrire du code moderne et maintenable...",
-          author: { username: "Claire Rousseau" },
-          createdAt: "2024-01-13T09:15:00Z",
-          views: 312
-        },
-        {
-          id: 4,
-          title: "Créer une API REST avec Node.js",
-          content: "Node.js permet de créer facilement des APIs REST performantes. Dans ce tutoriel, nous verrons comment structurer une API complète avec Express...",
-          author: { username: "David Leroy" },
-          createdAt: "2024-01-12T16:45:00Z",
-          views: 156
-        },
-        {
-          id: 5,
-          title: "Introduction au développement mobile avec React Native",
-          content: "React Native permet de développer des applications mobiles natives avec JavaScript. Découvrons comment créer votre première app mobile...",
-          author: { username: "Emma Moreau" },
-          createdAt: "2024-01-11T11:30:00Z",
-          views: 278
-        },
-        {
-          id: 6,
-          title: "Optimisation des performances web",
-          content: "Les performances web sont cruciales pour l'expérience utilisateur. Explorons les techniques d'optimisation les plus efficaces...",
-          author: { username: "François Bernard" },
-          createdAt: "2024-01-10T13:20:00Z",
-          views: 203
-        }
-      ];
-
-      setArticles(mockArticles);
-      setLoading(false);
+      const allStoredArticles = JSON.parse(localStorage.getItem('allArticles') || '[]');
+      if (allStoredArticles.length > 0) {
+        setArticles(allStoredArticles.filter(a => a.status !== 'draft'));
+      } else {
+        const mockArticles = [
+          {
+            id: 1,
+            title: "Introduction à React et ses hooks",
+            content: "React est une bibliothèque JavaScript populaire pour créer des interfaces utilisateur. Les hooks ont révolutionné la façon dont nous écrivons des composants React...",
+            author: { username: "Alice Dupont" },
+            createdAt: "2024-01-15T10:30:00Z",
+            views: 245
+          },
+          {
+            id: 2,
+            title: "Guide complet de TailwindCSS",
+            content: "TailwindCSS est un framework CSS utility-first qui permet de créer rapidement des designs personnalisés. Dans ce guide, nous explorerons ses fonctionnalités...",
+            author: { username: "Bob Martin" },
+            createdAt: "2024-01-14T14:20:00Z",
+            views: 189
+          },
+          {
+            id: 3,
+            title: "Les meilleures pratiques en JavaScript moderne",
+            content: "JavaScript évolue constamment avec de nouvelles fonctionnalités ES6+. Découvrons ensemble les meilleures pratiques pour écrire du code moderne et maintenable...",
+            author: { username: "Claire Rousseau" },
+            createdAt: "2024-01-13T09:15:00Z",
+            views: 312
+          },
+          {
+            id: 4,
+            title: "Créer une API REST avec Node.js",
+            content: "Node.js permet de créer facilement des APIs REST performantes. Dans ce tutoriel, nous verrons comment structurer une API complète avec Express...",
+            author: { username: "David Leroy" },
+            createdAt: "2024-01-12T16:45:00Z",
+            views: 156
+          },
+          {
+            id: 5,
+            title: "Introduction au développement mobile avec React Native",
+            content: "React Native permet de développer des applications mobiles natives avec JavaScript. Découvrons comment créer votre première app mobile...",
+            author: { username: "Emma Moreau" },
+            createdAt: "2024-01-11T11:30:00Z",
+            views: 278
+          },
+          {
+            id: 6,
+            title: "Optimisation des performances web",
+            content: "Les performances web sont cruciales pour l'expérience utilisateur. Explorons les techniques d'optimisation les plus efficaces...",
+            author: { username: "François Bernard" },
+            createdAt: "2024-01-10T13:20:00Z",
+            views: 203
+          }
+        ];
+        setArticles(mockArticles);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des articles:', error);
       toast({
@@ -95,6 +98,7 @@ const Home = () => {
         description: 'Impossible de charger les articles. Utilisation des données de démonstration.',
         variant: 'destructive',
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -110,6 +114,10 @@ const Home = () => {
   const truncateContent = (content, maxLength = 150) => {
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + '...';
+  };
+  
+  const scrollToArticles = () => {
+    articlesSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const filteredArticles = articles.filter(article =>
@@ -141,7 +149,7 @@ const Home = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="gradient-bg py-20">
+      <section className="gradient-bg text-primary-foreground py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +169,7 @@ const Home = () => {
                   Commencer à écrire
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 dark:text-white dark:hover:bg-white/10" onClick={scrollToArticles}>
                 <BookOpen className="mr-2 h-5 w-5" />
                 Explorer les articles
               </Button>
@@ -217,7 +225,7 @@ const Home = () => {
       </section>
 
       {/* Articles Section */}
-      <section className="py-16">
+      <section ref={articlesSectionRef} className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <div>

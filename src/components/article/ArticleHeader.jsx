@@ -1,13 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { Calendar, User, Eye, Heart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Calendar, User, Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
 
-const ArticleHeader = ({ article, formatDate }) => {
+const ArticleHeader = ({ article, formatDate, onVote }) => {
+  const { isAuthenticated } = useAuth();
+  const [voteStatus, setVoteStatus] = useState(null); // 'liked', 'disliked', or null
+
+  useEffect(() => {
+    // This is a simple simulation of fetching user's vote status for this article
+    const userVote = localStorage.getItem(`vote_article_${article.id}`);
+    if (userVote) {
+      setVoteStatus(userVote);
+    }
+  }, [article.id]);
+
+  const handleVote = (type) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour voter.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let newVoteStatus = voteStatus;
+
+    if (voteStatus === type) {
+      // User is un-voting
+      newVoteStatus = null;
+    } else {
+      // User is voting or changing vote
+      newVoteStatus = type;
+    }
+
+    setVoteStatus(newVoteStatus);
+    localStorage.setItem(`vote_article_${article.id}`, newVoteStatus || '');
+    onVote(type, voteStatus); // Pass current vote status to calculate changes
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
           <div className="flex items-center gap-1">
             <User className="h-4 w-4" />
             {article.author.username}
@@ -24,12 +61,20 @@ const ArticleHeader = ({ article, formatDate }) => {
         
         <div className="flex items-center gap-2">
           <Button 
-            variant="ghost" 
+            variant={voteStatus === 'liked' ? 'default' : 'ghost'} 
             size="sm"
-            onClick={() => toast({ title: "🚧 Cette fonctionnalité n'est pas encore implémentée—mais ne vous inquiétez pas ! Vous pouvez la demander dans votre prochaine requête ! 🚀" })}
+            onClick={() => handleVote('liked')}
           >
-            <Heart className="h-4 w-4 mr-1" />
+            <ThumbsUp className="h-4 w-4 mr-2" />
             {article.likes}
+          </Button>
+          <Button 
+            variant={voteStatus === 'disliked' ? 'destructive' : 'ghost'} 
+            size="sm"
+            onClick={() => handleVote('disliked')}
+          >
+            <ThumbsDown className="h-4 w-4 mr-2" />
+            {article.dislikes}
           </Button>
         </div>
       </div>

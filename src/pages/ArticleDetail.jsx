@@ -14,7 +14,7 @@ import { ArrowLeft } from 'lucide-react';
 const ArticleDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { article, loading: articleLoading } = useArticle(id);
+  const { article, loading: articleLoading, setArticle } = useArticle(id);
   const { comments } = useComments(id);
 
   const formatDate = (dateString) => {
@@ -22,6 +22,36 @@ const ArticleDetail = () => {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   };
+
+  const handleVote = (voteType, currentVoteStatus) => {
+    if (!article) return;
+
+    let { likes, dislikes } = article;
+
+    if (voteType === 'liked') {
+      if (currentVoteStatus === 'liked') {
+        likes -= 1; // Unlike
+      } else {
+        likes += 1; // Like
+        if (currentVoteStatus === 'disliked') {
+          dislikes -= 1; // Remove dislike
+        }
+      }
+    } else if (voteType === 'disliked') {
+      if (currentVoteStatus === 'disliked') {
+        dislikes -= 1; // Undislike
+      } else {
+        dislikes += 1; // Dislike
+        if (currentVoteStatus === 'liked') {
+          likes -= 1; // Remove like
+        }
+      }
+    }
+    
+    const updatedArticle = { ...article, likes, dislikes };
+    setArticle(updatedArticle);
+  };
+
 
   if (articleLoading) {
     return (
@@ -60,7 +90,7 @@ const ArticleDetail = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Card className="mb-8">
             <CardHeader>
-              <ArticleHeader article={article} formatDate={formatDate} />
+              <ArticleHeader article={article} formatDate={formatDate} onVote={handleVote} />
             </CardHeader>
             <CardContent>
               <ArticleContent content={article.content} />
