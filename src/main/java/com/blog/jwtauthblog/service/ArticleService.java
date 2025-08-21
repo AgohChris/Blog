@@ -70,8 +70,8 @@ public class ArticleService {
         return convertToResponse(article);
     }
 
-    //    Obtenir les articles d;un utilisateur
-    public Page<ArticleResponse> getArticles(Pageable pageable){
+    //    Obtenir les articles d'un utilisateur
+    public Page<ArticleResponse> getMyArticles(Pageable pageable){
         User currentUser = securtyUtils.getCurrentUser();
         Page<Article> articles = articleRepository.findByAuthorOrderByCreatedAtDesc(currentUser, pageable);
         return articles.map(this::convertToResponse);

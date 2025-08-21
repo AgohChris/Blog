@@ -66,6 +66,12 @@ public class CommentService {
         return comments.map(this::convertToResponse);
     }
 
+    public Page<CommentResponse> getMyComments(Pageable pageable){
+        User currentUSer = securtyUtils.getCurrentUser();
+        Page<Comment> comments = commentRepository.findByAuthorOrderByCreatedAtDesc(currentUSer, pageable);
+        return comments.map(this::convertToResponse);
+    }
+
 
     //   Modifier un commentaire
     public CommentResponse updateComment(Long id, CommentRequest request){
@@ -96,7 +102,7 @@ public class CommentService {
     }
 
 
-//    Pour ibtenir un commentaire spécifique
+//    Pour obtenir un commentaire spécifique
 
     public CommentResponse getCommentById(Long id){
         Comment comment = commentRepository.findById(id)
