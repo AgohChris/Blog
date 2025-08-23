@@ -1,57 +1,52 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthContext as useAuth } from '@/contexts/AuthContext.jsx';
 import CommentList from '@/components/comments/CommentList';
 import CommentForm from '@/components/comments/CommentForm';
 import { MessageCircle } from 'lucide-react';
 
-const CommentsSection = ({ comments: initialComments, articleId }) => {
+const CommentsSection = ({
+  comments,
+  loading,
+  error,
+  createComment,
+  updateComment,
+  deleteComment,
+  goToPage,
+  pagination
+}) => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const [comments, setComments] = useState(initialComments);
-  const [newComment, setNewComment] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    setSubmitting(true);
+  const handleSubmit = async (content) => {
     try {
-      const newCommentData = {
-        id: Date.now(), content: newComment, author: user, createdAt: new Date().toISOString(), articleId: parseInt(articleId)
-      };
-      setComments([...comments, newCommentData]);
-      setNewComment('');
+      await createComment({ contenu: content });
       toast({ title: 'Commentaire ajouté', description: 'Votre commentaire a été publié.' });
     } catch (error) {
-      toast({ title: 'Erreur', description: 'Impossible d\'ajouter le commentaire.', variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
+      toast({ title: 'Erreur', description: error.message || 'Impossible d\'ajouter le commentaire.', variant: 'destructive' });
     }
   };
 
   const handleUpdate = async (commentId, content) => {
     try {
-      const updatedComments = comments.map(c => c.id === commentId ? { ...c, content, updatedAt: new Date().toISOString() } : c);
-      setComments(updatedComments);
+      await updateComment(commentId, { contenu: content });
       toast({ title: 'Commentaire modifié', description: 'Votre commentaire a été mis à jour.' });
     } catch (error) {
-      toast({ title: 'Erreur', description: 'Impossible de modifier le commentaire.', variant: 'destructive' });
+      toast({ title: 'Erreur', description: error.message || 'Impossible de modifier le commentaire.', variant: 'destructive' });
     }
   };
 
   const handleDelete = async (commentId) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return;
     try {
-      setComments(comments.filter(c => c.id !== commentId));
+      await deleteComment(commentId);
       toast({ title: 'Commentaire supprimé', description: 'Le commentaire a été supprimé.' });
     } catch (error) {
-      toast({ title: 'Erreur', description: 'Impossible de supprimer le commentaire.', variant: 'destructive' });
+      toast({ title: 'Erreur', description: error.message || 'Impossible de supprimer le commentaire.', variant: 'destructive' });
     }
   };
 
@@ -60,16 +55,14 @@ const CommentsSection = ({ comments: initialComments, articleId }) => {
       <CardHeader>
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <MessageCircle className="h-6 w-6" />
-          Commentaires ({comments.length})
+          Commentaires ({pagination?.totalElements || comments.length})
         </h2>
       </CardHeader>
       <CardContent className="space-y-6">
         {isAuthenticated ? (
           <CommentForm
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
             onSubmit={handleSubmit}
-            submitting={submitting}
+            submitting={loading}
           />
         ) : (
           <div className="text-center py-8 bg-muted/50 rounded-lg">
@@ -77,7 +70,12 @@ const CommentsSection = ({ comments: initialComments, articleId }) => {
             <Button onClick={() => navigate('/login')}>Se connecter</Button>
           </div>
         )}
+        
+        {loading && <p>Chargement des commentaires...</p>}
+        {error && <p className="text-destructive">{error}</p>}
+
         {comments.length > 0 && <Separator />}
+        
         <CommentList
           comments={comments}
           user={user}
@@ -85,6 +83,20 @@ const CommentsSection = ({ comments: initialComments, articleId }) => {
           onDelete={handleDelete}
           onUpdate={handleUpdate}
         />
+
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            {Array.from({ length: pagination.totalPages }, (_, i) => (
+              <Button 
+                key={i} 
+                variant={pagination.page === i ? 'default' : 'outline'}
+                onClick={() => goToPage(i)}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

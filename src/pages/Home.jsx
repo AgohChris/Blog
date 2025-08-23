@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthContext as useAuth } from '@/contexts/AuthContext.jsx';
+import { useArticles } from '@/hooks/useApi';
 import { 
   Calendar, 
   User, 
@@ -17,93 +17,30 @@ import {
   TrendingUp,
   Clock,
   ArrowRight,
-  PenTool
+  PenTool,
+  MessageSquare
 } from 'lucide-react';
 
 const Home = () => {
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { articles, loading, error, pagination, goToPage, searchArticles } = useArticles();
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const { isAuthenticated } = useAuth();
-  const articlesPerPage = 6;
   const articlesSectionRef = useRef(null);
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
-
-  const fetchArticles = async () => {
-    try {
-      const allStoredArticles = JSON.parse(localStorage.getItem('allArticles') || '[]');
-      if (allStoredArticles.length > 0) {
-        setArticles(allStoredArticles.filter(a => a.status !== 'draft'));
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        searchArticles(searchTerm);
       } else {
-        const mockArticles = [
-          {
-            id: 1,
-            title: "Introduction à React et ses hooks",
-            content: "React est une bibliothèque JavaScript populaire pour créer des interfaces utilisateur. Les hooks ont révolutionné la façon dont nous écrivons des composants React...",
-            author: { username: "Alice Dupont" },
-            createdAt: "2024-01-15T10:30:00Z",
-            views: 245
-          },
-          {
-            id: 2,
-            title: "Guide complet de TailwindCSS",
-            content: "TailwindCSS est un framework CSS utility-first qui permet de créer rapidement des designs personnalisés. Dans ce guide, nous explorerons ses fonctionnalités...",
-            author: { username: "Bob Martin" },
-            createdAt: "2024-01-14T14:20:00Z",
-            views: 189
-          },
-          {
-            id: 3,
-            title: "Les meilleures pratiques en JavaScript moderne",
-            content: "JavaScript évolue constamment avec de nouvelles fonctionnalités ES6+. Découvrons ensemble les meilleures pratiques pour écrire du code moderne et maintenable...",
-            author: { username: "Claire Rousseau" },
-            createdAt: "2024-01-13T09:15:00Z",
-            views: 312
-          },
-          {
-            id: 4,
-            title: "Créer une API REST avec Node.js",
-            content: "Node.js permet de créer facilement des APIs REST performantes. Dans ce tutoriel, nous verrons comment structurer une API complète avec Express...",
-            author: { username: "David Leroy" },
-            createdAt: "2024-01-12T16:45:00Z",
-            views: 156
-          },
-          {
-            id: 5,
-            title: "Introduction au développement mobile avec React Native",
-            content: "React Native permet de développer des applications mobiles natives avec JavaScript. Découvrons comment créer votre première app mobile...",
-            author: { username: "Emma Moreau" },
-            createdAt: "2024-01-11T11:30:00Z",
-            views: 278
-          },
-          {
-            id: 6,
-            title: "Optimisation des performances web",
-            content: "Les performances web sont cruciales pour l'expérience utilisateur. Explorons les techniques d'optimisation les plus efficaces...",
-            author: { username: "François Bernard" },
-            createdAt: "2024-01-10T13:20:00Z",
-            views: 203
-          }
-        ];
-        setArticles(mockArticles);
+        goToPage(0);
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des articles:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de charger les articles. Utilisation des données de démonstration.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date inconnue';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
@@ -112,6 +49,7 @@ const Home = () => {
   };
 
   const truncateContent = (content, maxLength = 150) => {
+    if (!content) return '';
     if (content.length <= maxLength) return content;
     return content.substring(0, maxLength) + '...';
   };
@@ -120,18 +58,7 @@ const Home = () => {
     articlesSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.author.username.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const indexOfLastArticle = currentPage * articlesPerPage;
-  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
-  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
-  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
-
-  if (loading) {
+  if (loading && !articles.length) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -144,8 +71,6 @@ const Home = () => {
       <Helmet>
         <title>MiniBlog - Accueil</title>
         <meta name="description" content="Découvrez les derniers articles de notre communauté de développeurs et créateurs de contenu." />
-        <meta property="og:title" content="MiniBlog - Accueil" />
-        <meta property="og:description" content="Découvrez les derniers articles de notre communauté de développeurs et créateurs de contenu." />
       </Helmet>
 
       {/* Hero Section */}
@@ -169,7 +94,7 @@ const Home = () => {
                   Commencer à écrire
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 dark:text-white dark:hover:bg-white/10" onClick={scrollToArticles}>
+              <Button size="lg" variant="outline" className="border-white text-primary hover:bg-gray dark:text-white dark:hover:bg-white/10" onClick={scrollToArticles}>
                 <BookOpen className="mr-2 h-5 w-5" />
                 Explorer les articles
               </Button>
@@ -191,7 +116,7 @@ const Home = () => {
               <div className="flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4">
                 <BookOpen className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-3xl font-bold text-foreground mb-2">{articles.length}</h3>
+              <h3 className="text-3xl font-bold text-foreground mb-2">{pagination?.totalElements || 0}</h3>
               <p className="text-muted-foreground">Articles publiés</p>
             </motion.div>
             
@@ -246,74 +171,76 @@ const Home = () => {
             </div>
           </div>
 
-          {currentArticles.length === 0 ? (
+          {error && <p className="text-destructive text-center">{error}</p>}
+
+          {!loading && !articles.length && !error && (
             <div className="text-center py-12">
               <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">Aucun article trouvé</h3>
-              <p className="text-muted-foreground">Essayez de modifier vos critères de recherche.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentArticles.map((article, index) => (
-                <motion.div
-                  key={article.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="h-full hover:shadow-lg transition-all duration-300 group">
-                    <CardHeader>
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary" className="text-xs">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {formatDate(article.createdAt)}
-                        </Badge>
-                        <div className="flex items-center text-muted-foreground text-sm">
-                          <Eye className="h-4 w-4 mr-1" />
-                          {article.views}
-                        </div>
-                      </div>
-                      <CardTitle className="group-hover:text-primary transition-colors">
-                        {article.title}
-                      </CardTitle>
-                      <CardDescription className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {article.author.username}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground mb-4 line-clamp-3">
-                        {truncateContent(article.content)}
-                      </p>
-                      <Link to={`/article/${article.id}`}>
-                        <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                          Lire l'article
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+              <p className="text-muted-foreground">Essayez de modifier vos critères de recherche ou revenez plus tard.</p>
             </div>
           )}
 
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {articles.map((article, index) => (
+              <motion.div
+                key={article.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full hover:shadow-lg transition-all duration-300 group flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary" className="text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(article.publishedAt || article.createdAt)}
+                      </Badge>
+                      <div className="flex items-center text-muted-foreground text-sm">
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        {article.commentsCount}
+                      </div>
+                    </div>
+                    <CardTitle className="group-hover:text-primary transition-colors">
+                      {article.title}
+                    </CardTitle>
+                    <CardDescription className="flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      {article.authorUsername}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-grow flex flex-col">
+                    <p className="text-muted-foreground mb-4 line-clamp-3 flex-grow">
+                      {truncateContent(article.contenu)}
+                    </p>
+                    <Link to={`/articles/${article.id}`} className="mt-auto">
+                      <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        Lire l'article
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
           {/* Pagination */}
-          {totalPages > 1 && (
+          {pagination && pagination.totalPages > 1 && (
             <div className="flex justify-center mt-12 space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                onClick={() => goToPage(pagination.page - 1)}
+                disabled={pagination.first}
               >
                 Précédent
               </Button>
               
-              {[...Array(totalPages)].map((_, index) => (
+              {[...Array(pagination.totalPages)].map((_, index) => (
                 <Button
-                  key={index + 1}
-                  variant={currentPage === index + 1 ? "default" : "outline"}
-                  onClick={() => setCurrentPage(index + 1)}
+                  key={index}
+                  variant={pagination.page === index ? "default" : "outline"}
+                  onClick={() => goToPage(index)}
                   className="w-10"
                 >
                   {index + 1}
@@ -322,8 +249,8 @@ const Home = () => {
               
               <Button
                 variant="outline"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                onClick={() => goToPage(pagination.page + 1)}
+                disabled={pagination.last}
               >
                 Suivant
               </Button>
