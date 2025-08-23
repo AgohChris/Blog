@@ -3,8 +3,10 @@ package com.blog.jwtauthblog.util;
 import com.blog.jwtauthblog.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
-public class SecurtyUtils {
+@Component
+public class SecurityUtils {
     public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

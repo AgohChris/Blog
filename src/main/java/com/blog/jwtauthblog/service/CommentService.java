@@ -10,7 +10,7 @@ import com.blog.jwtauthblog.exception.ResourceNotFoundException;
 import com.blog.jwtauthblog.exception.UnauthorizedException;
 import com.blog.jwtauthblog.repository.ArticleRepository;
 import com.blog.jwtauthblog.repository.CommentRepository;
-import com.blog.jwtauthblog.util.SecurtyUtils;
+import com.blog.jwtauthblog.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,11 +27,11 @@ public class CommentService {
     private ArticleRepository articleRepository;
 
     @Autowired
-    private SecurtyUtils securtyUtils;
+    private SecurityUtils securityUtils;
 
 //    Creer un nouveau commentaire
     public CommentResponse createComment(CommentRequest request){
-        User currentUser = securtyUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         Article article = articleRepository.findById((request.getArticleId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Article non trouvé"));
@@ -67,7 +67,7 @@ public class CommentService {
     }
 
     public Page<CommentResponse> getMyComments(Pageable pageable){
-        User currentUSer = securtyUtils.getCurrentUser();
+        User currentUSer = securityUtils.getCurrentUser();
         Page<Comment> comments = commentRepository.findByAuthorOrderByCreatedAtDesc(currentUSer, pageable);
         return comments.map(this::convertToResponse);
     }
@@ -115,13 +115,13 @@ public class CommentService {
 
 
     public boolean canManageComment(Comment comment){
-        User currentUser = securtyUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         if (comment.getAuthor().getId().equals(currentUser.getId())){
             return true;
         }
 
-        return securtyUtils.hasRole("ADMIN");
+        return securityUtils.hasRole("ADMIN");
     }
 
 

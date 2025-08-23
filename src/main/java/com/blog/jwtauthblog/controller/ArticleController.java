@@ -28,7 +28,7 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @PostMapping
+    @PostMapping("/creer")
     @Operation(summary = "Créer un article", description = "Cré un nouvel article")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

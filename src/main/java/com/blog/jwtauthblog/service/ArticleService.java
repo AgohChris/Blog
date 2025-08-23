@@ -8,16 +8,12 @@ import com.blog.jwtauthblog.exception.ResourceNotFoundException;
 import com.blog.jwtauthblog.exception.UnauthorizedException;
 import com.blog.jwtauthblog.repository.ArticleRepository;
 import com.blog.jwtauthblog.repository.CommentRepository;
-import com.blog.jwtauthblog.util.SecurtyUtils;
-import jakarta.annotation.Resource;
+import com.blog.jwtauthblog.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.IconView;
 
 @Service
 @Transactional
@@ -30,11 +26,11 @@ public class ArticleService {
     private CommentRepository commentRepository;
 
     @Autowired
-    private SecurtyUtils securtyUtils;
+    private SecurityUtils securityUtils;
 
     // Créer un nouvel article
     public ArticleResponse createdArticle(ArticleRequest request){
-        User currentUser = securtyUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         Article article = new Article();
         article.setTitle(request.getTitle());
@@ -72,7 +68,7 @@ public class ArticleService {
 
     //    Obtenir les articles d'un utilisateur
     public Page<ArticleResponse> getMyArticles(Pageable pageable){
-        User currentUser = securtyUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
         Page<Article> articles = articleRepository.findByAuthorOrderByCreatedAtDesc(currentUser, pageable);
         return articles.map(this::convertToResponse);
     }
@@ -137,14 +133,14 @@ public class ArticleService {
 
 
     private boolean canManagerArticle(Article article) {
-        User currentUser = securtyUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         if (article.getAuthor().equals(currentUser.getId())){
             return true;
         }
 
 //        Pour que les admins puisse gérer tous les articles.
-        return securtyUtils.hasRole("ADMIN");
+        return securityUtils.hasRole("ADMIN");
     }
 
 
