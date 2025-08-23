@@ -4,28 +4,19 @@ import { Badge } from '@/components/ui/badge';
 import CommentActions from '@/components/comments/CommentActions';
 import CommentForm from '@/components/comments/CommentForm';
 
-const Comment = ({ comment, index, user, isAuthenticated, onEdit, onDelete, onUpdate }) => {
-  const [editing, setEditing] = React.useState(false);
-  const [editText, setEditText] = React.useState(comment.content);
+const Comment = ({ comment, index, user, isAuthenticated, onDelete, onUpdate }) => {
+  const [isEditing, setIsEditing] = React.useState(false);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date inconnue';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
   };
 
-  const handleEdit = () => {
-    setEditing(true);
-    setEditText(comment.content);
-  };
-
-  const handleCancel = () => {
-    setEditing(false);
-  };
-
-  const handleUpdate = () => {
-    onUpdate(comment.id, editText);
-    setEditing(false);
+  const handleUpdate = (content) => {
+    onUpdate(comment.id, content);
+    setIsEditing(false);
   };
 
   return (
@@ -37,25 +28,24 @@ const Comment = ({ comment, index, user, isAuthenticated, onEdit, onDelete, onUp
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-foreground">{comment.author.username}</span>
+          <span className="font-semibold text-foreground">{comment.authorUsername}</span>
           <span className="text-sm text-muted-foreground">{formatDate(comment.createdAt)}</span>
-          {comment.updatedAt && <Badge variant="secondary" className="text-xs">Modifié</Badge>}
+          {comment.updatedAt && comment.createdAt !== comment.updatedAt && <Badge variant="secondary" className="text-xs">Modifié</Badge>}
         </div>
-        {isAuthenticated && user?.id === comment.author.id && (
-          <CommentActions onEdit={handleEdit} onDelete={() => onDelete(comment.id)} />
+        {isAuthenticated && user?.username === comment.authorUsername && (
+          <CommentActions onEdit={() => setIsEditing(true)} onDelete={() => onDelete(comment.id)} />
         )}
       </div>
       
-      {editing ? (
+      {isEditing ? (
         <CommentForm
           isEditing
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
-          onSave={handleUpdate}
-          onCancel={handleCancel}
+          initialValue={comment.contenu}
+          onSubmit={handleUpdate}
+          onCancel={() => setIsEditing(false)}
         />
       ) : (
-        <p className="text-foreground whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-foreground whitespace-pre-wrap">{comment.contenu}</p>
       )}
     </motion.div>
   );

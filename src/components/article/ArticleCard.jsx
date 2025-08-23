@@ -6,6 +6,7 @@ import ArticleActions from '@/components/article/ArticleActions';
 
 const ArticleCard = ({ article, index, onDelete }) => {
   const formatDate = (dateString) => {
+    if (!dateString) return 'Date inconnue';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
@@ -25,14 +26,14 @@ const ArticleCard = ({ article, index, onDelete }) => {
           <h3 className="font-semibold text-foreground">
             {article.title}
           </h3>
-          <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
-            {article.status === 'published' ? 'Publié' : 'Brouillon'}
+          <Badge variant={article.published ? 'default' : 'secondary'}>
+            {article.published ? 'Publié' : 'Brouillon'}
           </Badge>
         </div>
         <ArticleInfo 
           date={formatDate(article.createdAt)}
-          views={article.views}
-          comments={article.comments}
+          views={article.views || 0}
+          comments={article.commentsCount}
         />
       </div>
       
