@@ -38,7 +38,7 @@ public class ArticleController {
         return new ResponseEntity<>(article, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/liste")
     @Operation(summary = "Liste des Articles publiés", description = "Récupère tous les articles publié avec pagination")
     public ResponseEntity<Page<ArticleResponse>> getPublishedArticles(
             @RequestParam(defaultValue = "0") int page,
