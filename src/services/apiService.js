@@ -9,7 +9,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 secondes
+  timeout: 20000, // Augmenté à 20 secondes
 });
 
 // Intercepteur pour ajouter automatiquement le token JWT
@@ -116,7 +116,7 @@ export const articleService = {
   // Récupérer tous les articles publiés
   async getPublishedArticles(page = 0, size = 10) {
     try {
-      const response = await apiClient.get('/articles', {
+      const response = await apiClient.get('/articles/liste', {
         params: { page, size }
       });
       return response.data;
@@ -150,7 +150,7 @@ export const articleService = {
   // Créer un article
   async createArticle(articleData) {
     try {
-      const response = await apiClient.post('/articles', articleData);
+      const response = await apiClient.post('/articles/creer', articleData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: error.message };
