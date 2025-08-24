@@ -5,9 +5,8 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea.jsx';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-// import { Switch } from '@/components/ui/switch';
 import { useAuthContext as useAuth } from '@/contexts/AuthContext.jsx';
 import { useMyArticles } from '@/hooks/useApi';
 import { toast } from '@/components/ui/use-toast';
@@ -114,14 +113,6 @@ const CreateArticle = () => {
             <Card>
               <CardHeader><CardTitle>Actions</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                {/* <div className="flex items-center justify-between">
-                  <Label htmlFor="preview-mode">Aperçu</Label>
-                  <Switch id="preview-mode" checked={preview} onCheckedChange={setPreview} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="publish-status">Publier</Label>
-                  <Switch id="publish-status" checked={published} onCheckedChange={setPublished} />
-                </div> */}
                 <Button onClick={() => handleSubmit(published)} disabled={loading} className="w-full">
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   {published ? 'Publier' : 'Sauvegarder le brouillon'}
