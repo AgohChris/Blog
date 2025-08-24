@@ -71,7 +71,7 @@ public class ArticleService {
     }
 
     //    Obtenir les articles d;un utilisateur
-    public Page<ArticleResponse> getArticles(Pageable pageable){
+    public Page<ArticleResponse> getMyArticles(Pageable pageable){
         User currentUser = securtyUtils.getCurrentUser();
         Page<Article> articles = articleRepository.findByAuthorOrderByCreatedAtDesc(currentUser, pageable);
         return articles.map(this::convertToResponse);
