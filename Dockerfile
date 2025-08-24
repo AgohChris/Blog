@@ -23,7 +23,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
 # Phase de runtime avec une image JRE plus légère
-FROM openjdk:17-jre-slim
+FROM openjdk:17-jdk-slim
 
 # Installe curl pour les health checks
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
