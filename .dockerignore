@@ -1,0 +1,30 @@
+# Fichiers de build
+target/
+!target/*.jar
+*.log
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.iml
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Environnement local
+.env
+.env.local
+.env.dev
+
+# Fichiers temporaires
+*.tmp
+*.temp
