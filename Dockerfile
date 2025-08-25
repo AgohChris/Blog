@@ -22,7 +22,6 @@ COPY src ./src
 # Compile l'application et créé le JAR
 RUN ./mvnw clean package -DskipTests
 
-# Phase de runtime avec une image JRE plus légère
 FROM openjdk:17-jdk-slim
 
 # Installe curl pour les health checks
