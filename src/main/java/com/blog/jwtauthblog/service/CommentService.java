@@ -96,6 +96,13 @@ public class CommentService {
     }
 
 
+    // Obtenir les commentaires de l'utilisateur connecté
+    public Page<CommentResponse> getMyComments(Pageable pageable){
+        User currentUser = securtyUtils.getCurrentUser();
+        Page<Comment> comments = commentRepository.findByAuthorOrderByCreatedAtDesc(currentUser, pageable);
+        return comments.map(this::convertToResponse);
+    }
+
 //    Pour ibtenir un commentaire spécifique
 
     public CommentResponse getCommentById(Long id){

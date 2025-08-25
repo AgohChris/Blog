@@ -15,10 +15,12 @@ com/blog/jwtauthblog/config/CorsConfig.class
 com/blog/jwtauthblog/util/SecurtyUtils.class
 com/blog/jwtauthblog/JwtAuthBlogApplication.class
 com/blog/jwtauthblog/controller/ArticleController.class
+com/blog/jwtauthblog/controller/CommentController.class
 com/blog/jwtauthblog/exception/BadRequestException.class
 com/blog/jwtauthblog/entity/Role.class
 com/blog/jwtauthblog/filter/JwtAuthenticationFilter.class
 com/blog/jwtauthblog/repository/CommentRepository.class
+com/blog/jwtauthblog/util/SecurityUtils.class
 com/blog/jwtauthblog/dto/article/ArticleUpdateRequest.class
 com/blog/jwtauthblog/exception/GlobalExceptionHandler$ErrorResponse.class
 com/blog/jwtauthblog/dto/article/ArticleResponse.class

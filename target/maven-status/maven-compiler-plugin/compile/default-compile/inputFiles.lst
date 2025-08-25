@@ -3,6 +3,7 @@
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/config/SecurityConfig.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/controller/ArticleController.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/controller/AuthController.java
+/Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/controller/CommentController.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/controller/UserController.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/dto/article/ArticleRequest.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/dto/article/ArticleResponse.java
@@ -33,4 +34,5 @@
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/service/CustomUserDetailsService.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/service/JwtService.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/service/UserService.java
+/Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/util/SecurityUtils.java
 /Users/py/Dev/BlogSpr/jwt-auth-blog/src/main/java/com/blog/jwtauthblog/util/SecurtyUtils.java
