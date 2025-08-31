@@ -1,0 +1,13 @@
+[vite] connecting... client:229:9
+[vite] connected. client:325:21
+GET
+http://localhost:5173/src/components/ui/switch
+NS_ERROR_CORRUPTED_CONTENT
+
+Le chargement du module à l’adresse « http://localhost:5173/src/components/ui/switch » a été bloqué en raison d’un type MIME interdit («  »). localhost:5173
+Échec du chargement pour le module dont la source est « http://localhost:5173/src/components/ui/switch ». CreateArticle.jsx
+Échec du chargement pour le module dont la source est « http://localhost:5173/src/components/ui/textarea.jsx ». CreateArticle.jsx
+GET
+http://localhost:5173/vite.svg
+[HTTP/1.1 404 Not Found 0ms]
+
