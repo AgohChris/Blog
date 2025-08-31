@@ -1,14 +1,11 @@
-# Utiliser une image OpenJDK légère
-FROM openjdk:17-jdk-slim
-
-# Définir le répertoire de travail dans le conteneur
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN ./mvnw clean package -DskipTests
 
-# Copier le JAR dans le conteneur
-COPY target/*.jar app.jar
 
-# Exposer le port par défaut de Spring Boot
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Démarrer l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
